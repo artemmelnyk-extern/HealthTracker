@@ -20,6 +20,7 @@ data class AuthUiState(
     val error: String? = null,
     val isRegisterMode: Boolean = false,
     val pendingEmailVerification: Boolean = false,
+    val pendingEmail: String = "",
     val loggedInUser: User? = null
 )
 
@@ -45,7 +46,7 @@ class AuthViewModel @Inject constructor(
                 .onSuccess { user ->
                     sessionManager.newSession()
                     if (!user.isEmailVerified) {
-                        _uiState.update { it.copy(isLoading = false, pendingEmailVerification = true) }
+                        _uiState.update { it.copy(isLoading = false, pendingEmailVerification = true, pendingEmail = email) }
                     } else {
                         _uiState.update { it.copy(isLoading = false, loggedInUser = user) }
                     }
@@ -64,7 +65,7 @@ class AuthViewModel @Inject constructor(
             registerUseCase(email, password, "")
                 .onSuccess {
                     _uiState.update {
-                        it.copy(isLoading = false, pendingEmailVerification = true, isRegisterMode = false)
+                        it.copy(isLoading = false, pendingEmailVerification = true, isRegisterMode = false, pendingEmail = email)
                     }
                 }
                 .onFailure { e ->
@@ -97,4 +98,13 @@ class AuthViewModel @Inject constructor(
     }
 
     fun clearError() = _uiState.update { it.copy(error = null) }
+
+    fun setError(message: String) = _uiState.update { it.copy(error = message) }
+
+    fun isValidEmail(email: String): Boolean = Companion.isValidEmail(email)
+
+    companion object {
+        private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        fun isValidEmail(email: String): Boolean = EMAIL_REGEX.matches(email.trim())
+    }
 }

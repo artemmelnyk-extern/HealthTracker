@@ -26,6 +26,7 @@ fun AuthScreen(
 
     if (uiState.pendingEmailVerification) {
         EmailVerificationScreen(
+            email = uiState.pendingEmail,
             onVerifiedClick = { viewModel.checkEmailVerified() },
             onResendClick = { viewModel.resendVerificationEmail() },
             isLoading = uiState.isLoading,
@@ -96,14 +97,16 @@ fun AuthScreen(
 
         Button(
             onClick = {
-                if (uiState.isRegisterMode) {
+                if (!viewModel.isValidEmail(email)) {
+                    viewModel.setError("Enter a valid email address.")
+                } else if (uiState.isRegisterMode) {
                     if (password == confirmPassword) {
-                        viewModel.register(email, password)
+                        viewModel.register(email.trim(), password)
                     } else {
-                        viewModel.clearError()
+                        viewModel.setError("Passwords do not match.")
                     }
                 } else {
-                    viewModel.login(email, password)
+                    viewModel.login(email.trim(), password)
                 }
             },
             enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
@@ -126,6 +129,7 @@ fun AuthScreen(
 
 @Composable
 private fun EmailVerificationScreen(
+    email: String,
     onVerifiedClick: () -> Unit,
     onResendClick: () -> Unit,
     isLoading: Boolean,
@@ -142,7 +146,7 @@ private fun EmailVerificationScreen(
         Text("Verify your email", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(16.dp))
         Text(
-            "A verification link has been sent to your email address. Click the link then return here.",
+            "A verification link has been sent to $email. Click the link then return here.",
             style = MaterialTheme.typography.bodyMedium
         )
 
