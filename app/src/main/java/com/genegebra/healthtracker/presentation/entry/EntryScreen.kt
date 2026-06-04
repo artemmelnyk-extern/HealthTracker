@@ -55,6 +55,12 @@ fun EntryScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Hold Log for 3 s to log again.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         } else {
             EntryForm(
                 isSaved = uiState.isSaved,

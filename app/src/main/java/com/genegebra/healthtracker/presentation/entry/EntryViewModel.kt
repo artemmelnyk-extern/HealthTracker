@@ -54,6 +54,11 @@ class EntryViewModel @Inject constructor(
         }
     }
 
+    fun resetSession() {
+        sessionManager.newSession()
+        _uiState.update { it.copy(existingEntry = null, isSaved = false, error = null) }
+    }
+
     fun saveEntry(
         systolic: String,
         diastolic: String,
