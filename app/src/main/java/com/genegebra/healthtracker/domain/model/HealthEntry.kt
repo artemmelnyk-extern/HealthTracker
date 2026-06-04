@@ -23,4 +23,11 @@ data class HealthEntry(
             if (p == 0) return null
             return (1.0 - d.toDouble() / p.toDouble()) * 100.0
         }
+
+    val robinsonIndex: Double?
+        get() {
+            val s = systolic ?: return null
+            val p = pulse ?: return null
+            return s.toDouble() * p.toDouble() / 100.0
+        }
 }

@@ -106,11 +106,16 @@ private fun EntryForm(
     Spacer(Modifier.height(12.dp))
     HealthIntField(value = anxietyLevel, onValueChange = { anxietyLevel = it }, label = "Anxiety level (0–10)", range = 0..10)
 
+    val s = systolic.toIntOrNull()
     val d = diastolic.toIntOrNull()
     val p = pulse.toIntOrNull()
     if (d != null && p != null && p > 0) {
         Spacer(Modifier.height(16.dp))
         KerdoIndexCard(kerdoIndex = (1.0 - d.toDouble() / p.toDouble()) * 100.0)
+    }
+    if (s != null && p != null) {
+        Spacer(Modifier.height(8.dp))
+        RobinsonIndexCard(robinsonIndex = s.toDouble() * p.toDouble() / 100.0)
     }
 
     error?.let {
@@ -176,6 +181,10 @@ private fun EntryReadOnlyCard(entry: com.genegebra.healthtracker.domain.model.He
         Spacer(Modifier.height(8.dp))
         KerdoIndexCard(kerdoIndex = index)
     }
+    entry.robinsonIndex?.let { index ->
+        Spacer(Modifier.height(8.dp))
+        RobinsonIndexCard(robinsonIndex = index)
+    }
 }
 
 @Composable
@@ -204,6 +213,40 @@ private fun KerdoIndexCard(kerdoIndex: Double) {
             }
             Text(
                 "$sign${"%.1f".format(kerdoIndex)}",
+                style = MaterialTheme.typography.headlineMedium,
+                color = color,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun RobinsonIndexCard(robinsonIndex: Double) {
+    val (label, description, color) = when {
+        robinsonIndex < 76 -> Triple("Excellent", "Low myocardial demand", Color(0xFF2E7D32))
+        robinsonIndex < 90 -> Triple("Good", "Moderate demand", MaterialTheme.colorScheme.primary)
+        robinsonIndex <= 110 -> Triple("Normal", "Average demand", Color(0xFFE65100))
+        else -> Triple("Elevated", "High myocardial demand", MaterialTheme.colorScheme.error)
+    }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("Robinson Index (RPP)", style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(label, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.Bold)
+                Text(description, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                "${"%.1f".format(robinsonIndex)}",
                 style = MaterialTheme.typography.headlineMedium,
                 color = color,
                 fontWeight = FontWeight.Bold

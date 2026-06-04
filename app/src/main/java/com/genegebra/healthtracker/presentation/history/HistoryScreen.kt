@@ -123,12 +123,17 @@ private fun HealthEntryCard(entry: HealthEntry, showUserEmail: Boolean) {
                 MetricChip("Pulse", entry.pulse, "bpm")
                 MetricChip("Anxiety", entry.anxietyLevel, "/10")
             }
-            entry.kerdoIndex?.let { index ->
+            val hasIndex = entry.kerdoIndex != null || entry.robinsonIndex != null
+            if (hasIndex) {
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Spacer(Modifier.height(8.dp))
-                KerdoIndexRow(kerdoIndex = index)
             }
+            entry.kerdoIndex?.let { KerdoIndexRow(kerdoIndex = it) }
+            if (entry.kerdoIndex != null && entry.robinsonIndex != null) {
+                Spacer(Modifier.height(6.dp))
+            }
+            entry.robinsonIndex?.let { RobinsonIndexRow(robinsonIndex = it) }
         }
     }
 }
@@ -153,6 +158,33 @@ private fun KerdoIndexRow(kerdoIndex: Double) {
         }
         Text(
             "$sign${"%.1f".format(kerdoIndex)}",
+            style = MaterialTheme.typography.titleMedium,
+            color = color,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun RobinsonIndexRow(robinsonIndex: Double) {
+    val (label, color) = when {
+        robinsonIndex < 76 -> "Excellent · Low demand" to Color(0xFF2E7D32)
+        robinsonIndex < 90 -> "Good · Moderate demand" to MaterialTheme.colorScheme.primary
+        robinsonIndex <= 110 -> "Normal · Average demand" to Color(0xFFE65100)
+        else -> "Elevated · High demand" to MaterialTheme.colorScheme.error
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text("Robinson Index (RPP)", style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = color)
+        }
+        Text(
+            "${"%.1f".format(robinsonIndex)}",
             style = MaterialTheme.typography.titleMedium,
             color = color,
             fontWeight = FontWeight.Bold
