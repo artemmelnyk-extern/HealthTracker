@@ -10,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.genegebra.healthtracker.domain.model.HealthEntry
@@ -121,7 +123,40 @@ private fun HealthEntryCard(entry: HealthEntry, showUserEmail: Boolean) {
                 MetricChip("Pulse", entry.pulse, "bpm")
                 MetricChip("Anxiety", entry.anxietyLevel, "/10")
             }
+            entry.kerdoIndex?.let { index ->
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(8.dp))
+                KerdoIndexRow(kerdoIndex = index)
+            }
         }
+    }
+}
+
+@Composable
+private fun KerdoIndexRow(kerdoIndex: Double) {
+    val (label, color) = when {
+        kerdoIndex > 0 -> "Sympathicotonia · Fight or Flight" to MaterialTheme.colorScheme.error
+        kerdoIndex < 0 -> "Vagotonia · Rest & Digest" to Color(0xFF2E7D32)
+        else -> "Eutonia · Balanced" to MaterialTheme.colorScheme.primary
+    }
+    val sign = if (kerdoIndex > 0) "+" else ""
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text("Kerdo Index", style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, style = MaterialTheme.typography.bodySmall, color = color)
+        }
+        Text(
+            "$sign${"%.1f".format(kerdoIndex)}",
+            style = MaterialTheme.typography.titleMedium,
+            color = color,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

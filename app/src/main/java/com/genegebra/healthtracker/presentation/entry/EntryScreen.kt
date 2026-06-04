@@ -8,6 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -104,6 +106,13 @@ private fun EntryForm(
     Spacer(Modifier.height(12.dp))
     HealthIntField(value = anxietyLevel, onValueChange = { anxietyLevel = it }, label = "Anxiety level (0–10)", range = 0..10)
 
+    val d = diastolic.toIntOrNull()
+    val p = pulse.toIntOrNull()
+    if (d != null && p != null && p > 0) {
+        Spacer(Modifier.height(16.dp))
+        KerdoIndexCard(kerdoIndex = (1.0 - d.toDouble() / p.toDouble()) * 100.0)
+    }
+
     error?.let {
         Spacer(Modifier.height(8.dp))
         Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
@@ -161,6 +170,44 @@ private fun EntryReadOnlyCard(entry: com.genegebra.healthtracker.domain.model.He
             ReadOnlyRow("Diastolic", entry.diastolic, "mmHg")
             ReadOnlyRow("Pulse", entry.pulse, "bpm")
             ReadOnlyRow("Anxiety", entry.anxietyLevel, "/ 10")
+        }
+    }
+    entry.kerdoIndex?.let { index ->
+        Spacer(Modifier.height(8.dp))
+        KerdoIndexCard(kerdoIndex = index)
+    }
+}
+
+@Composable
+private fun KerdoIndexCard(kerdoIndex: Double) {
+    val (label, description, color) = when {
+        kerdoIndex > 0 -> Triple("Sympathicotonia", "Fight or Flight", MaterialTheme.colorScheme.error)
+        kerdoIndex < 0 -> Triple("Vagotonia", "Rest & Digest", Color(0xFF2E7D32))
+        else -> Triple("Eutonia", "Balanced", MaterialTheme.colorScheme.primary)
+    }
+    val sign = if (kerdoIndex > 0) "+" else ""
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text("Kerdo Index", style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(label, style = MaterialTheme.typography.titleMedium, color = color, fontWeight = FontWeight.Bold)
+                Text(description, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                "$sign${"%.1f".format(kerdoIndex)}",
+                style = MaterialTheme.typography.headlineMedium,
+                color = color,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
