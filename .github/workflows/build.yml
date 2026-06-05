@@ -42,6 +42,16 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | tr -d ' \r\n' | base64 --decode > app/release.jks
 
+      - name: Print keystore SHA-1
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          keytool -list -v -keystore app/release.jks \
+            -alias "$KEY_ALIAS" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -noprompt 2>/dev/null | grep "SHA1:"
+
       - name: Cache Gradle packages
         uses: actions/cache@v5
         with:
