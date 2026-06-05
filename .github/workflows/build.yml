@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -71,14 +74,8 @@ jobs:
           BUILT_AT=$(date -u '+%Y-%m-%d %H:%M UTC')
           COMMIT_SHA="${{ github.sha }}"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin gh-pages 2>/dev/null || true
-          git checkout --orphan gh-pages-tmp
-
           mkdir -p /tmp/gh-pages
-          cp "$APK" /tmp/gh-pages/HealthTracker-debug.apk
+          cp "$APK" /tmp/gh-pages/HealthTracker-release.apk
 
           cat > /tmp/gh-pages/index.html <<EOF
           <!DOCTYPE html>
@@ -98,8 +95,8 @@ jobs:
           </head>
           <body>
             <h1>HealthTracker</h1>
-            <p>Android debug build — latest from <code>main</code>.</p>
-            <a class="btn" href="HealthTracker-debug.apk" download>Download APK</a>
+            <p>Android release build — latest from <code>main</code>.</p>
+            <a class="btn" href="HealthTracker-release.apk" download>Download APK</a>
             <p class="meta">Built: $BUILT_AT &nbsp;|&nbsp; Commit: <a href="https://github.com/${{ github.repository }}/commit/$COMMIT_SHA">${COMMIT_SHA:0:7}</a></p>
           </body>
           </html>
@@ -107,6 +104,8 @@ jobs:
 
           cd /tmp/gh-pages
           git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b gh-pages
           git add .
           git commit -m "deploy: $BUILT_AT (${COMMIT_SHA:0:7})"
