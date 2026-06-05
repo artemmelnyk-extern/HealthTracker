@@ -71,7 +71,7 @@ jobs:
         run: |
           APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
           APK_NAME=$(basename "$APK")
-          BUILT_AT=$(date -u '+%Y-%m-%d %H:%M UTC')
+          BUILT_AT=$(TZ='Europe/Paris' date '+%Y-%m-%d %H:%M Paris')
           COMMIT_SHA="${{ github.sha }}"
 
           mkdir -p /tmp/gh-pages
